@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets ###
+# Ces fichiers contiennent mots de passe et clés privées : jamais dans Git.
+# Seul .env.properties.example, sans valeurs réelles, est versionné.
+.env.properties
+.env.dev.properties
+.env.prod.properties
