@@ -13,4 +13,6 @@ public interface NotificationPreferenceRepository extends JpaRepository<Notifica
     Optional<NotificationPreference> findByUserAndEventType(User user, String eventType);
 
     List<NotificationPreference> findByUser(User user);
+
+    void deleteByUser(User user);
 }

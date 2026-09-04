@@ -1,5 +1,6 @@
 package com.raikiservices.backend.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.raikiservices.backend.entity.BlogPost;
 import com.raikiservices.backend.entity.BlogStatus;
+import com.raikiservices.backend.entity.User;
 
 public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
 
@@ -18,6 +20,9 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     Page<BlogPost> findByStatus(BlogStatus status, Pageable pageable);
 
     Optional<BlogPost> findBySlugAndStatus(String slug, BlogStatus status);
+
+    /** Articles d'un auteur — sert à détacher l'auteur avant de supprimer son compte. */
+    List<BlogPost> findByAuthor(User author);
 
     @Query("""
             SELECT b FROM BlogPost b WHERE

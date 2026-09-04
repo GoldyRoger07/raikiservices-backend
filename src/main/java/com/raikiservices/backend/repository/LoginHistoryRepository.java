@@ -10,4 +10,6 @@ import com.raikiservices.backend.entity.User;
 public interface LoginHistoryRepository extends JpaRepository<LoginHistory, Long> {
 
     Page<LoginHistory> findByUserOrderByDateDesc(User user, Pageable pageable);
+
+    void deleteByUser(User user);
 }
