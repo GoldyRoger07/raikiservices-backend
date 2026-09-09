@@ -89,12 +89,29 @@ public class ContactService {
 
     @Transactional(readOnly = true)
     public PageResponse<ContactMessageResponse> getAll(PageQuery query) {
+        return getAll(query, null);
+    }
+
+    /**
+     * Page de messages, filtree par texte libre et / ou par statut.
+     *
+     * @param status statut exige, ou {@code null} pour ne pas filtrer dessus
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ContactMessageResponse> getAll(PageQuery query, ContactStatus status) {
         Pageable pageable = query.toPageable(SORTABLE, "submittedAt");
         String filter = query.filterOrNull();
 
-        Page<ContactMessage> result = filter == null
-                ? contactMessageRepository.findAll(pageable)
-                : contactMessageRepository.search(filter, pageable);
+        Page<ContactMessage> result;
+        if (filter == null) {
+            result = status == null
+                    ? contactMessageRepository.findAll(pageable)
+                    : contactMessageRepository.findByStatus(status, pageable);
+        } else {
+            result = status == null
+                    ? contactMessageRepository.search(filter, pageable)
+                    : contactMessageRepository.searchByStatus(filter, status, pageable);
+        }
 
         return PageResponse.from(result, ContactMessageResponse::summaryFrom);
     }

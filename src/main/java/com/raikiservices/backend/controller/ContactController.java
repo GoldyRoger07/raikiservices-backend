@@ -18,6 +18,7 @@ import com.raikiservices.backend.dto.common.PageResponse;
 import com.raikiservices.backend.dto.contact.ContactMessageRequest;
 import com.raikiservices.backend.dto.contact.ContactMessageResponse;
 import com.raikiservices.backend.dto.contact.ContactMessageUpdateRequest;
+import com.raikiservices.backend.entity.ContactStatus;
 import com.raikiservices.backend.service.ContactService;
 
 import jakarta.validation.Valid;
@@ -53,10 +54,11 @@ public class ContactController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String sortField,
             @RequestParam(defaultValue = "desc") String sortOrder,
-            @RequestParam(defaultValue = "") String globalFilter) {
+            @RequestParam(defaultValue = "") String globalFilter,
+            @RequestParam(required = false) ContactStatus status) {
 
         return ResponseEntity.ok(contactService.getAll(
-                new PageQuery(page, size, sortField, sortOrder, globalFilter)));
+                new PageQuery(page, size, sortField, sortOrder, globalFilter), status));
     }
 
     @PreAuthorize("hasAuthority('READ_CONTACT')")
