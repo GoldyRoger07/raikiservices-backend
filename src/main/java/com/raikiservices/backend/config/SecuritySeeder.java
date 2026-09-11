@@ -45,6 +45,17 @@ public class SecuritySeeder implements ApplicationRunner {
         perm("READ_BLOG", "BLOG", "READ", "Voir les articles, brouillons compris");
         perm("UPDATE_BLOG", "BLOG", "UPDATE", "Modifier un article et le publier");
         perm("DELETE_BLOG", "BLOG", "DELETE", "Supprimer un article");
+        // Réalisations présentées sur le site vitrine
+        perm("CREATE_PROJECT", "PROJECTS", "CREATE", "Créer une réalisation");
+        perm("READ_PROJECT", "PROJECTS", "READ", "Voir les réalisations, brouillons compris");
+        perm("UPDATE_PROJECT", "PROJECTS", "UPDATE",
+                "Modifier une réalisation, la publier et réordonner la vitrine");
+        perm("DELETE_PROJECT", "PROJECTS", "DELETE", "Supprimer une réalisation");
+        // Bibliothèque d'images
+        perm("CREATE_MEDIA", "MEDIA", "CREATE", "Envoyer des images dans la bibliothèque");
+        perm("READ_MEDIA", "MEDIA", "READ", "Voir la bibliothèque d'images");
+        perm("UPDATE_MEDIA", "MEDIA", "UPDATE", "Modifier le texte alternatif d'une image");
+        perm("DELETE_MEDIA", "MEDIA", "DELETE", "Supprimer une image de la bibliothèque");
         // Messages du formulaire de contact
         perm("READ_CONTACT", "CONTACT", "READ", "Voir les messages du formulaire de contact");
         perm("UPDATE_CONTACT", "CONTACT", "UPDATE", "Changer le statut et annoter un message");
@@ -67,6 +78,9 @@ public class SecuritySeeder implements ApplicationRunner {
         // Sessions actives
         perm("READ_SESSION", "SESSIONS", "READ", "Voir les sessions actives");
         perm("DELETE_SESSION", "SESSIONS", "DELETE", "Révoquer une session");
+        // Réglages du site vitrine (offre de lancement)
+        perm("READ_SETTING", "SETTINGS", "READ", "Voir les réglages du site");
+        perm("UPDATE_SETTING", "SETTINGS", "UPDATE", "Modifier les réglages du site, dont l'offre de lancement");
         // Notifications
         perm("READ_NOTIFICATION_SETTINGS", "NOTIFICATIONS", "READ", "Voir les paramètres de notifications");
         perm("UPDATE_NOTIFICATION_SETTINGS", "NOTIFICATIONS", "UPDATE", "Configurer les notifications");
@@ -81,6 +95,8 @@ public class SecuritySeeder implements ApplicationRunner {
 
     private static final List<String> EDITOR_PERMISSIONS = List.of(
             "CREATE_BLOG", "READ_BLOG", "UPDATE_BLOG",
+            "CREATE_PROJECT", "READ_PROJECT", "UPDATE_PROJECT",
+            "CREATE_MEDIA", "READ_MEDIA", "UPDATE_MEDIA",
             "READ_CONTACT", "UPDATE_CONTACT");
 
     private final PermissionRepository permissionRepository;
@@ -111,7 +127,7 @@ public class SecuritySeeder implements ApplicationRunner {
         Map<String, Permission> permissions = seedPermissions();
         Role adminRole = seedRole(ROLE_ADMIN, "Accès complet à l'administration",
                 new LinkedHashSet<>(permissions.values()));
-        seedRole(ROLE_EDITOR, "Rédaction du blog et suivi des messages de contact",
+        seedRole(ROLE_EDITOR, "Rédaction du blog, gestion des réalisations et suivi des messages",
                 collect(permissions, EDITOR_PERMISSIONS));
         seedAdminUser(adminRole);
     }
