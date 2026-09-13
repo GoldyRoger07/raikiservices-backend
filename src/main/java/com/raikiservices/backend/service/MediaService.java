@@ -24,7 +24,7 @@ import com.raikiservices.backend.repository.UserRepository;
 /**
  * Bibliothèque d'images du back-office.
  *
- * <p>Tient l'inventaire des fichiers déposés chez Cloudinary et encadre leur cycle de vie :
+ * <p>Tient l'inventaire des fichiers déposés chez ImageKit et encadre leur cycle de vie :
  * autorisation d'envoi, déclaration après téléversement, suppression conjointe ici et
  * là-bas.
  */
@@ -38,22 +38,22 @@ public class MediaService {
     private final MediaAssetRepository mediaAssetRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
-    private final CloudinaryService cloudinary;
+    private final ImageKitService imageKit;
 
     public MediaService(MediaAssetRepository mediaAssetRepository,
             ProjectRepository projectRepository,
             UserRepository userRepository,
-            CloudinaryService cloudinary) {
+            ImageKitService imageKit) {
 
         this.mediaAssetRepository = mediaAssetRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
-        this.cloudinary = cloudinary;
+        this.imageKit = imageKit;
     }
 
     /** Autorisation d'envoi direct, à usage unique. */
     public UploadSignatureResponse signUpload(String subfolder) {
-        return cloudinary.signUpload(subfolder);
+        return imageKit.signUpload(subfolder);
     }
 
     /**
@@ -68,6 +68,7 @@ public class MediaService {
         MediaAsset asset = mediaAssetRepository.findByPublicId(request.publicId())
                 .orElseGet(MediaAsset::new);
 
+        asset.setFileId(request.fileId());
         asset.setPublicId(request.publicId());
         asset.setSecureUrl(request.secureUrl());
         asset.setFormat(request.format());
@@ -118,15 +119,15 @@ public class MediaService {
     }
 
     /**
-     * Supprime l'image chez Cloudinary puis sa fiche.
+     * Supprime l'image chez ImageKit puis sa fiche.
      *
      * <p>Refuse tant qu'un projet l'affiche, en nommant les projets concernés : une image
      * retirée sous les pieds du site laisserait un emplacement vide en page d'accueil ou au
      * portfolio.
      *
-     * <p>Cloudinary d'abord, la fiche ensuite : dans ce sens, un échec côté Cloudinary
-     * interrompt l'opération et la bibliothèque reste fidèle à ce qui est réellement
-     * hébergé. L'ordre inverse laisserait un fichier facturé sans plus aucune trace ici.
+     * <p>ImageKit d'abord, la fiche ensuite : dans ce sens, un échec côté ImageKit interrompt
+     * l'opération et la bibliothèque reste fidèle à ce qui est réellement hébergé. L'ordre
+     * inverse laisserait un fichier facturé sans plus aucune trace ici.
      */
     @Transactional
     public void delete(Long id) {
@@ -141,7 +142,16 @@ public class MediaService {
                             + ". Retirez-la de ces projets avant de la supprimer.");
         }
 
-        cloudinary.destroy(asset.getPublicId());
+        if (asset.getFileId() == null || asset.getFileId().isBlank()) {
+            // Fiche héritée de Cloudinary : sans fileId, ImageKit n'a aucune prise sur le
+            // fichier. Supprimer la fiche seule masquerait un fichier resté facturé ailleurs.
+            throw new BusinessRuleException(
+                    "Cette fiche est antérieure à la bascule vers ImageKit et ne porte pas "
+                            + "d'identifiant de fichier. Supprimez-la depuis la base après avoir "
+                            + "vérifié le sort du fichier d'origine.");
+        }
+
+        imageKit.destroy(asset.getFileId());
         mediaAssetRepository.delete(asset);
     }
 
@@ -152,7 +162,7 @@ public class MediaService {
                 .orElseThrow(() -> ResourceNotFoundException.of("Image", id));
     }
 
-    /** « raiki/projets/abc123 » donne « raiki/projets ». */
+    /** « /raiki/projets/abc123.jpg » donne « /raiki/projets ». */
     private static String folderOf(String publicId) {
         int lastSlash = publicId.lastIndexOf('/');
         return lastSlash <= 0 ? "" : publicId.substring(0, lastSlash);

@@ -13,13 +13,13 @@ import jakarta.persistence.PrePersist;
 import lombok.Data;
 
 /**
- * Fiche locale d'une image hébergée chez Cloudinary.
+ * Fiche locale d'une image hébergée chez ImageKit.
  *
- * <p>Le fichier vit chez Cloudinary, son inventaire ici. Tenir cette table plutôt que
- * d'interroger l'API d'administration de Cloudinary à chaque affichage évite d'en consommer
- * le quota — limité, et distinct de celui de livraison — et rend la bibliothèque du
- * back-office paginable comme les autres listes, sans dépendre de la disponibilité d'un
- * service tiers. Cloudinary n'est sollicité qu'à l'envoi et à la suppression.
+ * <p>Le fichier vit chez ImageKit, son inventaire ici. Tenir cette table plutôt que
+ * d'interroger l'API d'administration d'ImageKit à chaque affichage évite d'en consommer le
+ * quota — limité, et distinct de celui de livraison — et rend la bibliothèque du back-office
+ * paginable comme les autres listes, sans dépendre de la disponibilité d'un service tiers.
+ * ImageKit n'est sollicité qu'à l'envoi et à la suppression.
  */
 @Entity
 @Data
@@ -29,11 +29,22 @@ public class MediaAsset {
     @GeneratedValue
     private Long id;
 
-    /** Identifiant Cloudinary, dossier compris — « raiki/projets/abc123 ». */
+    /**
+     * Identifiant interne d'ImageKit, seule clé acceptée pour supprimer le fichier.
+     *
+     * <p>Colonne facultative en base et non le contraire : les fiches antérieures à la
+     * bascule depuis Cloudinary n'en portent pas, et exiger la valeur ferait échouer la
+     * migration du schéma sur une table déjà peuplée. La suppression, elle, refuse
+     * explicitement une fiche sans {@code fileId}.
+     */
+    @Column(unique = true)
+    private String fileId;
+
+    /** Chemin ImageKit, dossier compris — « /raiki/projets/abc123_xY9.jpg ». */
     @Column(nullable = false, unique = true)
     private String publicId;
 
-    /** Adresse livrée par Cloudinary à l'envoi, sans transformation. */
+    /** Adresse livrée par ImageKit à l'envoi, sans transformation. */
     @Column(nullable = false, length = 1000)
     private String secureUrl;
 
@@ -45,7 +56,7 @@ public class MediaAsset {
 
     private Long bytes;
 
-    /** Dossier Cloudinary, pour regrouper la bibliothèque par usage. */
+    /** Dossier ImageKit, pour regrouper la bibliothèque par usage. */
     private String folder;
 
     private String originalFilename;

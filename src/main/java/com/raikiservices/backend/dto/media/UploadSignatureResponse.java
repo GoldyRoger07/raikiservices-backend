@@ -1,23 +1,28 @@
 package com.raikiservices.backend.dto.media;
 
 /**
- * Autorisation d'envoi direct vers Cloudinary.
+ * Autorisation d'envoi direct vers ImageKit.
  *
  * <p>Le navigateur poste au {@code uploadUrl} un formulaire multipart contenant le fichier,
- * {@code api_key}, {@code timestamp}, {@code folder} et {@code signature} — exactement ces
- * champs : Cloudinary recalcule l'empreinte sur ce qu'il reçoit et refuse au moindre écart.
+ * {@code fileName}, puis {@code publicKey}, {@code token}, {@code expire}, {@code signature}
+ * et {@code folder} repris tels quels : ImageKit recalcule l'empreinte sur le couple
+ * {@code token + expire} reçu et refuse au moindre écart.
  *
- * <p>Ni le secret d'API ni aucune capacité d'écriture durable ne sortent d'ici : la
- * signature ne vaut que pour cet envoi, et Cloudinary rejette un horodatage périmé.
+ * <p>Ni la clé privée ni aucune capacité d'écriture durable ne sortent d'ici : le triplet
+ * ne vaut qu'une minute, et ImageKit rejette un jeton déjà consommé.
  *
- * @param maxBytes taille acceptée, à faire respecter côté navigateur avant l'envoi
+ * @param urlEndpoint base des adresses de livraison, pour recomposer les URL côté client
+ * @param expire      horodatage Unix, en secondes, au-delà duquel l'autorisation est caduque
+ * @param folder      dossier de destination, à envoyer tel quel avec le fichier
+ * @param maxBytes    taille acceptée, à faire respecter côté navigateur avant l'envoi
  */
 public record UploadSignatureResponse(
-        String cloudName,
-        String apiKey,
-        long timestamp,
-        String folder,
+        String publicKey,
+        String urlEndpoint,
+        String token,
+        long expire,
         String signature,
+        String folder,
         String uploadUrl,
         long maxBytes) {
 }

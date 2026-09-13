@@ -7,6 +7,7 @@ import com.raikiservices.backend.entity.User;
 
 public record MediaAssetResponse(
         Long id,
+        String fileId,
         String publicId,
         String secureUrl,
         String format,
@@ -24,6 +25,7 @@ public record MediaAssetResponse(
         User author = asset.getUploadedBy();
         return new MediaAssetResponse(
                 asset.getId(),
+                asset.getFileId(),
                 asset.getPublicId(),
                 asset.getSecureUrl(),
                 asset.getFormat(),

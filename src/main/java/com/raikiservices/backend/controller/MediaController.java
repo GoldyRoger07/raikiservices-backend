@@ -28,9 +28,9 @@ import jakarta.validation.Valid;
 /**
  * Bibliothèque d'images du back-office.
  *
- * <p>Aucune face publique : les images sont livrées par le CDN de Cloudinary, le site
- * vitrine n'a donc jamais à interroger ces routes. Le fichier lui-même ne passe pas par
- * ici — le navigateur demande une signature, téléverse en direct, puis déclare le résultat.
+ * <p>Aucune face publique : les images sont livrées par le CDN d'ImageKit, le site vitrine
+ * n'a donc jamais à interroger ces routes. Le fichier lui-même ne passe pas par ici — le
+ * navigateur demande une autorisation, téléverse en direct, puis déclare le résultat.
  */
 @RestController
 @RequestMapping("/api/v1/media")
@@ -43,7 +43,7 @@ public class MediaController {
     }
 
     /**
-     * Autorisation d'envoi direct vers Cloudinary.
+     * Autorisation d'envoi direct vers ImageKit.
      *
      * @param folder sous-dossier facultatif, rangé sous le dossier racine configuré
      */
@@ -55,7 +55,7 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.signUpload(folder));
     }
 
-    /** Déclaration d'une image téléversée, à appeler avec la réponse de Cloudinary. */
+    /** Déclaration d'une image téléversée, à appeler avec la réponse d'ImageKit. */
     @PreAuthorize("hasAuthority('CREATE_MEDIA')")
     @PostMapping
     public ResponseEntity<MediaAssetResponse> register(
@@ -93,7 +93,7 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.update(id, request));
     }
 
-    /** Supprime l'image chez Cloudinary et sa fiche. Refusé si un projet l'affiche. */
+    /** Supprime l'image chez ImageKit et sa fiche. Refusé si un projet l'affiche. */
     @PreAuthorize("hasAuthority('DELETE_MEDIA')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

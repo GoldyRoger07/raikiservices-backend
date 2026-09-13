@@ -63,9 +63,9 @@ public class Project {
     private String websiteUrl;
 
     /**
-     * Identifiant Cloudinary de l'image de couverture, jamais une URL complète : l'adresse
-     * est recomposée à l'affichage avec ses transformations, ce qui permet d'en changer
-     * sans toucher aux données.
+     * Chemin ImageKit de l'image de couverture, jamais une URL complète : l'adresse est
+     * recomposée à l'affichage en préfixant l'endpoint du compte et en suffixant les
+     * transformations, ce qui permet d'en changer sans toucher aux données.
      */
     private String coverPublicId;
 
